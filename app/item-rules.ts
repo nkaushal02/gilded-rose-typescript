@@ -1,4 +1,4 @@
-import { AGED_BRIE, BACKSTAGE_PASS, MIN_QUALITY, SULFURAS } from './constants';
+import { AGED_BRIE, BACKSTAGE_PASS, CONJURED_PREFIX, MIN_QUALITY, SULFURAS } from './constants';
 import { Item } from './item';
 import { decreaseQuality, increaseQuality, isExpired } from './quality';
 
@@ -34,6 +34,15 @@ const updateBackstagePass: ItemRule = (item) => {
   }
 };
 
+// Conjured items degrade twice as fast as normal items.
+const updateConjuredItem: ItemRule = (item) => {
+  decreaseQuality(item, 2);
+  item.sellIn--;
+  if (isExpired(item)) {
+    decreaseQuality(item, 2);
+  }
+};
+
 // Legendary item: never has to be sold and never loses quality.
 const updateSulfuras: ItemRule = () => {};
 
@@ -43,6 +52,13 @@ const RULES: { [name: string]: ItemRule } = {
   [SULFURAS]: updateSulfuras,
 };
 
+function isConjured(item: Item): boolean {
+  return item.name.indexOf(CONJURED_PREFIX) === 0;
+}
+
 export function ruleFor(item: Item): ItemRule {
+  if (isConjured(item)) {
+    return updateConjuredItem;
+  }
   return RULES.hasOwnProperty(item.name) ? RULES[item.name] : updateNormalItem;
 }

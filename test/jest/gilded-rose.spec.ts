@@ -103,6 +103,41 @@ describe('Gilded Rose', () => {
     });
   });
 
+  describe('Conjured items', () => {
+    const CONJURED = 'Conjured Mana Cake';
+
+    it('degrades in quality twice as fast as normal items', () => {
+      const item = update(CONJURED, 3, 6);
+      expect(item.sellIn).toBe(2);
+      expect(item.quality).toBe(4);
+    });
+
+    it('degrades four times as fast once the sell date has passed', () => {
+      const item = update(CONJURED, 0, 10);
+      expect(item.sellIn).toBe(-1);
+      expect(item.quality).toBe(6);
+    });
+
+    it('never lets quality go negative', () => {
+      expect(update(CONJURED, 3, 0).quality).toBe(0);
+      expect(update(CONJURED, 3, 1).quality).toBe(0);
+      expect(update(CONJURED, 0, 3).quality).toBe(0);
+      expect(update(CONJURED, -1, 0).quality).toBe(0);
+    });
+
+    it('does not treat a normal item with a similar name as conjured', () => {
+      expect(update('Mana Cake', 3, 6).quality).toBe(5);
+    });
+  });
+
+  describe('empty inventory', () => {
+    it('defaults to no items and returns an empty list', () => {
+      const gildedRose = new GildedRose();
+      expect(gildedRose.items).toEqual([]);
+      expect(gildedRose.updateQuality()).toEqual([]);
+    });
+  });
+
   describe('multiple items', () => {
     it('updates every item in the inventory independently', () => {
       const items = new GildedRose([
