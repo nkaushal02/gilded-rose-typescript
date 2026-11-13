@@ -5,6 +5,7 @@
     "strict": true,
     "noImplicitAny": false,
     "sourceMap": true,
+    "outDir": "dist",
     "baseUrl": "./",
     "resolveJsonModule": true,
     "esModuleInterop": true,
@@ -14,6 +15,10 @@
       ]
     }
   },
+  "include": [
+    "app",
+    "test"
+  ],
   "exclude": [
     "node_modules"
   ]
