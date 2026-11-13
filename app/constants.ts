@@ -5,3 +5,7 @@ export const CONJURED_PREFIX = 'Conjured';
 
 export const MIN_QUALITY = 0;
 export const MAX_QUALITY = 50;
+
+// Backstage passes gain extra quality as the concert approaches.
+export const BACKSTAGE_DOUBLE_RATE_DAYS = 10;
+export const BACKSTAGE_TRIPLE_RATE_DAYS = 5;

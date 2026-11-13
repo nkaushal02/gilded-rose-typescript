@@ -1,16 +1,30 @@
-import { AGED_BRIE, BACKSTAGE_PASS, CONJURED_PREFIX, MIN_QUALITY, SULFURAS } from './constants';
+import {
+  AGED_BRIE,
+  BACKSTAGE_DOUBLE_RATE_DAYS,
+  BACKSTAGE_PASS,
+  BACKSTAGE_TRIPLE_RATE_DAYS,
+  CONJURED_PREFIX,
+  MIN_QUALITY,
+  SULFURAS,
+} from './constants';
 import { Item } from './item';
 import { decreaseQuality, increaseQuality, isExpired } from './quality';
 
 export type ItemRule = (item: Item) => void;
 
-const updateNormalItem: ItemRule = (item) => {
-  decreaseQuality(item);
+// Loses `rate` quality per day, and twice that once the sell-by date has passed.
+const degradingRule = (rate: number): ItemRule => (item) => {
+  decreaseQuality(item, rate);
   item.sellIn--;
   if (isExpired(item)) {
-    decreaseQuality(item);
+    decreaseQuality(item, rate);
   }
 };
+
+const updateNormalItem = degradingRule(1);
+
+// Conjured items degrade twice as fast as normal items.
+const updateConjuredItem = degradingRule(2);
 
 const updateAgedBrie: ItemRule = (item) => {
   increaseQuality(item);
@@ -22,24 +36,15 @@ const updateAgedBrie: ItemRule = (item) => {
 
 const updateBackstagePass: ItemRule = (item) => {
   increaseQuality(item);
-  if (item.sellIn < 11) {
+  if (item.sellIn <= BACKSTAGE_DOUBLE_RATE_DAYS) {
     increaseQuality(item);
   }
-  if (item.sellIn < 6) {
+  if (item.sellIn <= BACKSTAGE_TRIPLE_RATE_DAYS) {
     increaseQuality(item);
   }
   item.sellIn--;
   if (isExpired(item)) {
     item.quality = MIN_QUALITY;
-  }
-};
-
-// Conjured items degrade twice as fast as normal items.
-const updateConjuredItem: ItemRule = (item) => {
-  decreaseQuality(item, 2);
-  item.sellIn--;
-  if (isExpired(item)) {
-    decreaseQuality(item, 2);
   }
 };
 
@@ -52,6 +57,7 @@ const RULES: { [name: string]: ItemRule } = {
   [SULFURAS]: updateSulfuras,
 };
 
+// Any item whose name starts with "Conjured" (e.g. "Conjured Mana Cake").
 function isConjured(item: Item): boolean {
   return item.name.indexOf(CONJURED_PREFIX) === 0;
 }

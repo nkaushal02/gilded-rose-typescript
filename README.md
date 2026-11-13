@@ -44,24 +44,21 @@ npm install
 
 ## Run the tests
 
-Jest is the supported test runner.
+Tests use [Jest](https://jestjs.io/).
 
 ```sh
-npm run test:jest          # run once, with a coverage report
+npm test                   # run once, with a coverage report
 npm run test:jest:watch    # re-run on file changes
 ```
 
 ## Compile
 
 ```sh
-npm run compile                    # compile to ./dist
-npx tsc --noEmit --skipLibCheck    # type-check only, no output files
+npm run compile                # compile to ./dist
+npx tsc --noEmit               # type-check only, no output files
 ```
 
-`npm run compile` cleans and rewrites `dist/` (git-ignored). The script uses `--skipLibCheck`,
-which skips type checking of third-party declaration files. Without it, `tsc` reports errors from
-conflicting type definitions inside `node_modules` (the jest and mocha typings clash). None of
-them come from this project's code, which is still fully type-checked.
+`npm run compile` cleans and rewrites `dist/`, which is git-ignored.
 
 ## Run the program
 
@@ -79,9 +76,9 @@ Each line is `name, sellIn, quality`.
 ```
 app/
 ├── item.ts          Item class (unchanged from the starter, only moved to its own file)
-├── constants.ts     item names, quality limits
+├── constants.ts     item names, quality limits, backstage thresholds
 ├── quality.ts       helpers: increaseQuality, decreaseQuality, isExpired
-├── item-rules.ts    one update rule per item type, plus the lookup (ruleFor)
+├── item-rules.ts    one rule per item type, plus the lookup (ruleFor)
 └── gilded-rose.ts   GildedRose class (re-exports Item for existing imports)
 test/
 ├── jest/            unit tests and the approval (golden master) test
@@ -124,6 +121,7 @@ behaviour, then restructure, then add the feature, then document.
 | 3 | Refactor into item-specific quality update rules | Simplify the logic with tests proving nothing changed |
 | 4 | Add Conjured support, with tests | The new feature, built on the cleaner structure |
 | 5 | Documentation | Setup, run instructions, requirements and decisions |
+| 6 | Final cleanup | Remove unused starter files, tidy the rules and constants, verify on a fresh install |
 
 **3. Wrote tests before changing any logic.** I wrote tests for every rule (normal items, Aged Brie,
 Sulfuras, Backstage passes, expiry, and the 0 and 50 bounds) and kept the starter's 30-day golden
@@ -142,7 +140,13 @@ check. I wrote its tests, including the case after expiry and the floor at 0. Th
 snapshot changed for the Conjured Mana Cake rows only, which I reviewed line by line before
 accepting. The starter's own comment on that item says it "does not work properly yet".
 
-**6. Verified.** 24 tests and 2 snapshots pass, with 100% coverage of the production code.
+**6. Cleaned up and verified.** I removed the unused starter scaffolding (the Mocha and Vitest example
+specs and configs, the TextTest script and their dependencies), because only Jest is used and those
+specs still held the starter's failing `'fixme'` placeholder. I also made two small readability
+changes: a single `degradingRule(rate)` shared by normal and Conjured items instead of two copies,
+and named constants for the Backstage 10-day and 5-day thresholds. I then ran a fresh
+`npm install`, type-check, the tests and the text fixture in a clean copy. 24 tests and 2 snapshots
+pass, with 100% coverage of the production code.
 
 ### Use of AI
 
